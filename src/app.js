@@ -2,17 +2,29 @@ const express = require("express");
 
 const app= express();
 
-app.use("/rudr" ,(req,res)=>{
 
-    res.send("my name is rudra")
-})
+app.use("/user" , (req,res,next)=>{
+ 
+    next();
+   // res.send("my name is rudra");
 
-app.use("/ranjan" , (req,res)=>{
+},(req,res,next)=>{
 
-    res.send("my self ranjan kumar i am a mern stack developer");
-})
+  //  res.send("my name is ranjan")
+    next();
+},(req,res,next)=>{
+  
+    next();
+  //  res.send("rote3");
+},(req,res,next)=>{
+   
+    next();
+    res.send("route4")
+}
+)
+
 
 app.listen(8080,()=>{
 
-    console.log("server run succesfully");
+    console.log("server run succesfully port 7777");
 });
