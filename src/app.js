@@ -1,30 +1,17 @@
 const express = require("express");
 
-const app= express();
+const app = express();
 
+const connectDB = require("./config/database");
 
-app.use("/user" , (req,res,next)=>{
- 
-    next();
-   // res.send("my name is rudra");
+connectDB()
+  .then(() => {
+    console.log("database connect succefully");
+    app.listen(8080, () => {
+      console.log("succefully server started");
+    });
+  })
+  .catch((err) => {
+    console.error("database not connected");
+  });
 
-},(req,res,next)=>{
-
-  //  res.send("my name is ranjan")
-    next();
-},(req,res,next)=>{
-  
-    next();
-  //  res.send("rote3");
-},(req,res,next)=>{
-   
-    next();
-    res.send("route4")
-}
-)
-
-
-app.listen(8080,()=>{
-
-    console.log("server run succesfully port 7777");
-});
