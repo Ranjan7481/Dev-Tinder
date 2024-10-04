@@ -4,8 +4,13 @@ const app = express();
 const User = require("./models/user");
 const bcrypt = require("bcrypt");
 const { validatesignupData } = require("./utils/validate");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const user = require("./models/user");
+const {userAuth} =require("./middlewear/Auth")
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   //   Creating a new instance of the User model
@@ -31,34 +36,42 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login" , async(req,res)=>{
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
 
-  try{
-
-    const {emailId , password} = req.body;
-
-    const user = await User.findOne({emailId : emailId});
-     if(!user){
+    const user = await User.findOne({ emailId: emailId });
+    console.log(user);
+    if (!user) {
       throw new Error("Invalid credentials");
+    }
+    const ispasswordValid = await bcrypt.compare(password, user.password);
 
-     }
-     const ispasswordValid = await bcrypt.compare(password ,user.password);
+    if (ispasswordValid) {
+      const token = await jwt.sign({ _id: user._id }, "DEV@TINDER&7481", {expiresIn: "7d"});
 
-     if(ispasswordValid){
+      // Add the token and send the response back to the user
+      res.cookie("token", token,{
+        expires: new Date(Date.now() + 8 *3600000)
+      });
       res.send("login Succesfully");
-
-     }else{
+    } else {
       throw new Error("Invalid credentials");
-     }
-
-  }catch(err){
-
+    }
+  } catch (err) {
     res.status(400).send("ERROR : " + err.message);
   }
+});
 
+app.get("/profile",userAuth, async (req, res) => {
+  try {
+  const user = req.user;
 
-})
-
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("ERROR :" + err.message);
+  }
+});
 // Get user by email
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
